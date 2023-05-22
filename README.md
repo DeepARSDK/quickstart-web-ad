@@ -2,7 +2,7 @@ This is an example of a DeepAR web ad with a carousel for multiple effects with 
 
 To develop an it helps to have a basic understanding of HTML, CSS and JavaScript. You can use any text editor to edit the files. We recommend using [Visual Studio Code](https://code.visualstudio.com/).
 
-To run the development server, you need to have [Node.js](https://nodejs.org/en/) installed. Then, navigate to the ad's subdirectory with `cd *ad-name*` and run the following commands in the terminal:
+To run the development server, you need to have [Node.js](https://nodejs.org/en/) installed. Then, run the following commands in the terminal:
 
 ```bash
     npm install
