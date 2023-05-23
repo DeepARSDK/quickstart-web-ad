@@ -143,6 +143,11 @@ body {
 .toolbar-photo {
   overflow: hidden;
   border: 2px solid white;
+  -webkit-touch-callout: none; /* Safari Touch */
+  -webkit-user-select: none; /* Webkit */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Edge*/
+  user-select: none; /* Future-proof*/
 }
 .toolbar-photo.active {
   background-color: #010c43;
