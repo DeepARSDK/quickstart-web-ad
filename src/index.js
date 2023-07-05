@@ -2,7 +2,12 @@ import * as deepar from "deepar";
 import platform from "platform";
 import Carousel from "./carousel.js";
 import { CircularProgressBar } from "./circularProgressBar.js";
-import { stopRecording, startRecording, startRecordingiOS, stopRecordingiOS } from "./mp4CanvasRecorder.js";
+import {
+  stopRecording,
+  startRecording,
+  startRecordingiOS,
+  stopRecordingiOS,
+} from "./mp4CanvasRecorder.js";
 import QRCode from "qrcode";
 
 const VIDEO_TIME_LIMIT_SECONDS = 10;
@@ -147,7 +152,8 @@ async function main() {
       canvas.height = Math.floor(window.innerHeight * scale);
 
       deepAR = await deepar.initialize({
-        licenseKey: "your-license-key-here",
+        licenseKey:
+          "4b0df3e8c75116b990debe8dc1886a2d2f630b70dc1bdad3a6a2ac6a52eddc20197321454fb7111e",
         canvas,
         effect: effects.effect1.path,
         additionalOptions: {
@@ -173,12 +179,14 @@ async function main() {
       arLoadedEvent();
       trackUsage();
 
-      deepAR.callbacks.onFaceTracked = function (face) {
-        if (!faceTracked) {
-          faceTracked = true;
-          trackUsage();
-        }
-      };
+      if (deepAR) {
+        deepAR.callbacks.onFaceTracked = function (face) {
+          if (!faceTracked) {
+            faceTracked = true;
+            trackUsage();
+          }
+        };
+      }
     } catch (error) {
       console.log("error initialising deepAR");
       // permission not granted or some other issue
@@ -188,42 +196,44 @@ async function main() {
     }
   }
 
-  deepAR.callbacks.__deeparRendered = function () {
-    // this allows us to render graphics (like a logo) on top of the deepAR canvas for the video recording
-    if (!isRecording) {
-      return;
-    }
-    const milliseconds = Date.now() - recordingStarted;
-    const seconds = Math.floor(milliseconds / 1000);
-    window.videoRecordingDurationSeconds = seconds;
-    appendSeconds.innerHTML = seconds;
-    circularProgressBar.setPercent(milliseconds / 10000);
+  if (deepAR) {
+    deepAR.callbacks.__deeparRendered = function () {
+      // this allows us to render graphics (like a logo) on top of the deepAR canvas for the video recording
+      if (!isRecording) {
+        return;
+      }
+      const milliseconds = Date.now() - recordingStarted;
+      const seconds = Math.floor(milliseconds / 1000);
+      window.videoRecordingDurationSeconds = seconds;
+      appendSeconds.innerHTML = seconds;
+      circularProgressBar.setPercent(milliseconds / 10000);
 
-    if (seconds >= VIDEO_TIME_LIMIT_SECONDS && isRecording) {
-      stopRecordingWithCallback();
-    }
+      if (seconds >= VIDEO_TIME_LIMIT_SECONDS && isRecording) {
+        stopRecordingWithCallback();
+      }
 
-    watermarkCtx.drawImage(
-      canvas,
-      0,
-      0,
-      watermarkedCanvas.width,
-      watermarkedCanvas.height
-    );
-
-    // get image from file
-    if (logoImg) {
-      var logoHeight = 20 * 3;
-      var logoWidth = 128 * 3;
       watermarkCtx.drawImage(
-        logoImg,
-        watermarkedCanvas.width / 2 - logoWidth / 2,
-        watermarkedCanvas.height - logoHeight * 4,
-        logoWidth,
-        logoHeight
+        canvas,
+        0,
+        0,
+        watermarkedCanvas.width,
+        watermarkedCanvas.height
       );
-    }
-  };
+
+      // get image from file
+      if (logoImg) {
+        var logoHeight = 20 * 3;
+        var logoWidth = 128 * 3;
+        watermarkCtx.drawImage(
+          logoImg,
+          watermarkedCanvas.width / 2 - logoWidth / 2,
+          watermarkedCanvas.height - logoHeight * 4,
+          logoWidth,
+          logoHeight
+        );
+      }
+    };
+  }
 
   async function handleSelectEffect(effect) {
     if (!deepAR) return;
@@ -375,8 +385,7 @@ async function main() {
     let mp4Blob;
 
     if (browser === "safari" || platform.os.family === "iOS") {
-      const { recordedVideoBlob } =
-        await stopRecordingiOS();
+      const { recordedVideoBlob } = await stopRecordingiOS();
       mp4Blob = recordedVideoBlob;
     } else {
       mp4Blob = await stopRecording();
@@ -433,11 +442,7 @@ async function main() {
         isRecording = true;
         startRecordingiOS(watermarkedCanvas);
       } else {
-        await startRecording(
-          canvas,
-          deepAR,
-          circularProgressBar
-        );
+        await startRecording(canvas, deepAR, circularProgressBar);
       }
 
       recordingStatus.style.display = "flex";
@@ -463,7 +468,6 @@ async function main() {
 
   const infoLogo = document.getElementById("info-logo");
   infoLogo.onclick = () => {
-
     const infoSlideIndex = Object.values(effects).length;
 
     glassesCarousel.setActiveSlide(infoSlideIndex);
